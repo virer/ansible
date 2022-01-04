@@ -1,0 +1,11 @@
+---
+
+rootdn_password: "MySuperRoot:Passw0rd"
+
+user_password_hash: "{CLEARTEXT}secret"
+
+basedn: o=example
+
+servers_fqdn:
+  - "ldap1.necs.example.be"
+  - "ldap2.necs.example.be"

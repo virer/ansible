@@ -1,0 +1,24 @@
+---
+# tasks file for vip
+- name: Install keepalived
+  package:
+    name: keepalived
+    state: latest
+
+- name: Template file to keepalived.conf
+  template:
+    src: templates/keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: '0640'
+  notify:
+  - Restart keepalived
+
+- name: add rich rule for keepalived vrrp
+  firewalld:
+    rich_rule: 'rule protocol value="vrrp" accept'
+    permanent: true
+    immediate: true
+    state: enabled
+  tags: networking

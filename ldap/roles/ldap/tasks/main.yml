@@ -1,0 +1,10 @@
+
+
+- name: install part
+  include_tasks: install.yml
+
+- name: networking part
+  include_tasks: networking.yml
+
+- name: configuration part
+  include_tasks: configuration.yml

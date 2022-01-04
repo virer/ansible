@@ -1,0 +1,18 @@
+---
+
+tls_keysize: 2048
+ca_subject: minio.apps.328xxxx.example.be
+cert_days: +1095d # max +1095d years
+
+fqdn_alternative_common_names_list:
+  - "DNS:*.example-minio-hl.example-minio.svc.cluster.local"
+  - "DNS:minio.example-minio.svc.cluster.local"
+  - "DNS:minio.example-minio"
+  - "DNS:minio.example-minio.svc"
+  - "DNS:*.example-minio-hl.example-minio.svc.cluster.local"
+  - "DNS:*.example-minio.svc.cluster.local"
+  - "DNS:*.328xxxx.example.be"
+  - "DNS:*.apps.328xxxx.example.be"
+
+fqdn_list:
+  - minio.apps.328xxxx.example.be

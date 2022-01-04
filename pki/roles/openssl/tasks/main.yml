@@ -1,0 +1,119 @@
+- name: Ensure directory exists for local certificates
+  file:
+    path: "{{ local_dir_certs }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+  tags: ca
+
+- name: Generate private keys
+  openssl_privatekey:
+    path: "{{ local_dir_certs }}/{{ item }}.key"
+    backup: yes
+    force: "{{ force_generate }}"
+  loop:
+  - "ca"
+  tags: ca
+
+- name: Generate CA CSR
+  openssl_csr:
+    path: "{{ local_dir_certs }}/ca.csr"
+    privatekey_path: "{{ local_dir_certs }}/ca.key"
+    common_name: "{{ ca_subject }}"
+    key_usage:
+    - digitalSignature
+    - keyEncipherment
+    - keyCertSign
+    extended_key_usage:
+    - clientAuth
+    - serverAuth
+    basic_constraints_critical: yes
+    basic_constraints: 
+    - "CA:TRUE"
+    backup: yes
+    force: "{{ force_generate }}"
+  tags: ca
+
+- name: Generate CA certificate
+  openssl_certificate:
+    entrust_not_after: "{{ cert_days }}"
+    path: "{{ local_dir_certs }}/ca.crt"
+    privatekey_path: "{{ local_dir_certs }}/ca.key"
+    csr_path: "{{ local_dir_certs}}/ca.csr"
+    provider: selfsigned
+    backup: yes
+    force: "{{ force_generate }}"
+  tags: ca
+
+- name: Generate Diffie-Hellman parameters
+  openssl_dhparam:
+    path: "{{ local_dir_certs }}/dhparam.pem"
+    size: "{{ tls_keysize }}"
+    backup: yes
+    force: "{{ force_generate }}"
+  tags: ca
+  
+- name: Set appropriate permissions
+  file:
+    path: "{{ local_dir_certs}}/{{ item }}"
+    state: touch
+    mode: u+rw,g-rwx,o-rwx
+    modification_time: preserve
+    access_time: preserve
+  loop:
+  - ca.key
+  - dhparam.pem
+
+# --------------------------------------------------------------------------------------
+
+- name: Generate private keys
+  openssl_privatekey:
+    path: "{{ local_dir_certs }}/{{ item }}.key"
+    backup: yes
+    force: "{{ force_generate }}"
+  with_items:
+    - "{{ fqdn_list }}"
+  tags: servers
+
+- name: Generate server CSR
+  openssl_csr:
+    path: "{{ local_dir_certs }}/{{ item }}.csr"
+    privatekey_path: "{{ local_dir_certs }}/{{ item }}.key"
+    # common_name: "{{ item }}"
+    subject: "CN={{ item }}"
+    backup: yes
+    force: "{{ force_generate }}"
+    subjectAltName: "{{ fqdn_alternative_common_names_list + [ 'DNS:' + item ] }}"
+    use_common_name_for_san: False
+  with_items:
+    - "{{ fqdn_list }}"
+  tags: servers
+
+
+
+- name: Sign server certificate
+  openssl_certificate:
+    entrust_not_after: "{{ cert_days }}"
+    path: "{{ local_dir_certs }}/{{ item }}.crt"
+    privatekey_path: "{{ local_dir_certs }}/{{ item }}.key"
+    csr_path: "{{ local_dir_certs}}/{{ item }}.csr"
+    provider: ownca
+    ownca_path: "{{ local_dir_certs }}/ca.crt"
+    ownca_privatekey_path: "{{ local_dir_certs }}/ca.key"
+    backup: yes
+    force: "{{ force_generate }}"
+  with_items:
+    - "{{ fqdn_list }}"
+  tags: servers
+
+
+- name: Set appropriate permissions
+  file:
+    path: "{{ local_dir_certs}}/{{ item }}.key"
+    state: touch
+    mode: u+rw,g-rwx,o-rwx
+    modification_time: preserve
+    access_time: preserve
+  with_items:
+    - "{{ fqdn_list }}"

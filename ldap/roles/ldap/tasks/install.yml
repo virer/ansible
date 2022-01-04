@@ -1,0 +1,39 @@
+# - name: Install repo
+#   copy:
+#     src: files/ltb-project.repo
+#     dest: /etc/yum.repos.d/ltb-project.repo
+#     mode: '0644'
+#     owner: root
+#     group: root
+#   tags: install
+
+# - name: import repo key
+#   rpm_key:
+#     state: present
+#     key: https://ltb-project.org/lib/RPM-GPG-KEY-LTB-project
+#   tags: install
+  
+# - name: Install packages from repo
+#   package:
+#     name: openldap-ltb
+#     state: latest
+#   tags: install
+
+- name: Install packages from repo
+  package:
+    name: "{{ item }}"
+    state: installed
+  loop:
+    - openldap-clients
+    - openldap
+    - openldap-servers
+    - openssl
+    - openssl-perl
+  tags: install
+
+- name: Service mgmt
+  service:
+    name: slapd
+    enabled: true
+    state: started
+  tags: install

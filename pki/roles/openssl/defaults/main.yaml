@@ -1,0 +1,8 @@
+local_dir_certs: /opt/etc/ssl/private
+force_generate: no
+tls_keysize: 2048
+ca_subject: Company CA
+cert_days: +365d # max +1095d years
+fqdn_alternative_common_names_list:
+  - "DNS: highly-available-endpoint.domain.tld"
+  - "DNS: my-virtual-ip-fqdn.domain.tld"

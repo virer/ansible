@@ -1,0 +1,17 @@
+---
+
+
+
+- hosts: all
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Get variables
+      include_vars: "vars/vars.yml"
+
+- hosts: all
+  become: yes
+  gather_facts: yes
+  
+  roles:
+    - vip

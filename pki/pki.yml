@@ -1,0 +1,15 @@
+---
+
+- hosts: all
+  gather_facts: no
+  connection: local
+  tasks:
+    - name: Get variables
+      include_vars: "vars/main.yml"
+      
+- hosts: all
+  gather_facts: no
+  become: yes
+  roles:
+  - role: openssl
+    tags: openssl

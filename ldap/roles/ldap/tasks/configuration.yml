@@ -1,0 +1,86 @@
+
+- name: "hash password"
+  shell: |
+    TMPFILE=$( mktemp )
+    touch $TMPFILE
+    echo '{{ rootdn_password }}' > $TMPFILE
+    slappasswd -o module-load=pw-sha2 -h '{SSHA512}' -T $TMPFILE
+    rm -f $TMPFILE
+  register: out
+
+- name: "Register hash pw"
+  set_fact:
+    rootdn_hashed_password: "{{ out.stdout }}"
+
+- name: "Directory"
+  file:
+    path: "/opt/ldap/"
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+
+- name: "copy ldiff"
+  template:
+    src: templates/{{ item }}
+    dest: /opt/ldap/{{ item }}
+    owner: root
+    group: root
+    mode: 0600
+  loop:
+    - 01_load_module.ldif
+    - 02_server_id_1.ldiff
+    - 02_server_id_2.ldiff
+    - 03_schema.ldiff
+    - 04_db_access.ldif
+    - 06_sync.ldiff
+    - 07_rootdn.ldif
+    - 08_replication.ldiff
+    - 99_tls.ldif
+    - ldap.conf
+    - sysconfig.slapd
+    - zz_indexes.ldiff
+    - zz_password.ldif
+    - zz_users_example.ldif
+
+- name: "copy ldap client config"
+  template:
+    src: templates/ldap.conf
+    dest: /etc/openldap/ldap.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "copy ldap server startup config"
+  template:
+    src: templates/sysconfig.slapd
+    dest: /etc/sysconfig.slapd
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "copy ldap server startup config"
+  copy:
+    src: files/DB_CONFIG
+    dest: /var/lib/ldap/DB_CONFIG
+    owner: root
+    group: root
+    mode: 0644
+
+# - name: "Configure SLAPD"
+#   shell: |
+#       cd /opt/ldap
+#       ldapadd -Y EXTERNAL -H ldapi:/// -f 01_load_module.ldif
+#       # For primary
+#       # ldapmodify -Y EXTERNAL -H ldapi:/// -f 02_server_id_1.ldiff
+#       # For secondary server 
+#       # ldapmodify -Y EXTERNAL -H ldapi:/// -f 02_server_id_2.ldiff        
+#         ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+#         ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+#         ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+#  !!!       slapadd -n 0 -F /etc/openldap/slapd.d -l 04_db_access.ldif
+#       ldapadd -Y EXTERNAL -H ldapi:/// -f 06_sync.ldiff
+#
+#       ldapadd -Y EXTERNAL -H ldapi:/// -f 08_replicatoindexes.ldif
+#       # ldapadd -Y EXTERNAL -H ldapi:/// -f 98_users.ldif
+#       ldapadd -Y EXTERNAL -H ldapi:/// -f 99_tls.ldif

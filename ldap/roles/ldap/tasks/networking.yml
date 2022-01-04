@@ -1,0 +1,13 @@
+
+
+- name: FirewallD rules
+  firewalld:
+    permanent: yes
+    immediate: yes
+    service: "{{ item }}"
+    state: enabled
+  with_items:
+    - ldap
+    - ldaps
+  tags: networking
+

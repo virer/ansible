@@ -1,0 +1,15 @@
+! Configuration File for keepalived
+
+vrrp_instance VI_1 {
+        interface {{ ansible_default_ipv4.interface }}
+        virtual_router_id {{ vip_router_id }}
+        priority {{ 100 | random }}
+        advert_int 1
+        authentication {
+              auth_type PASS
+              auth_pass {{ vip_shared_secret }}
+        }
+        virtual_ipaddress {
+              {{ vip_virtual_ip }}
+        }
+}
