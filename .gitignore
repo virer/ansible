@@ -2,6 +2,6 @@ pki/vars/ciw.yaml
 pki/vars/ciw.yml
 pki/vars/nrbdigital.yaml
 pki/vars/nrbdigital.yml
-pki/vars/kafka-ethias.yaml
 pki/vars/kafka-ethias.yml
+pki/vars/kafka2-ethias.yml
 ldap/roles/ldap/templates/*

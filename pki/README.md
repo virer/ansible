@@ -4,4 +4,4 @@ Local usage
 
 
 Usage example whe you already generate the CA
-  ansible-playbook -i 10.108.129.22, -u root --skip-tags ca pki.yml
+  ansible-playbook -i 10.108.193.122, -u root --skip-tags ca pki.yml
