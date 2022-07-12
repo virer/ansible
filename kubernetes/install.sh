@@ -1,28 +1,5 @@
-# --service-cidr
-#
-#
-
-
-cat <<EOF> dns_lab.yml
-
-- hosts: all
-  connection: local
-  gather_facts: false
-  tasks:
-  - name: keyscan remote machine key to host
-    shell: ssh-keyscan {{ ansible_host }} >> "{{ lookup('env','HOME') }}/.ssh/known_hosts"
-    register: known_hosts
-
-- hosts: all
-  gather_facts: false
-  tasks:
-  - name: setup dns
-    shell: echo {{ ansible_host }} {{ inventory_hostname }} >> /etc/hosts
-EOF
-
-ansible-playbook -i hosts.inv dns_lab.yml
-
-
+#!/bin/bash
+###########
 
 ansible-galaxy collection install  gaurav_gupta_gtm.ansible_kubeadm
 
@@ -31,7 +8,6 @@ cp -r .ansible/collections/ansible_collections/gaurav_gupta_gtm/ansible_kubeadm/
 # Patch
 sed -i 's#--pod-network-cidr#--service-cidr#g' .ansible/roles/master/tasks/main.yml
 sed -i 's/slave/worker/g' node/README.md
-
 
 mkdir -m 750 .ssh group_vars
 cat <<EOF> group_vars/all.yml
@@ -45,7 +21,6 @@ network: weave
 container_runtime: crio
 
 EOF
-
 
 cat <<EOF> playbook.yml
 
@@ -131,3 +106,5 @@ cat <<EOF> playbook.yml
 EOF
 
 # ansible-playbook -i hosts.inv playbook.yml
+
+# EOF
