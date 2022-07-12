@@ -1,0 +1,14 @@
+[master]
+# 3281801201
+master ansible_host=192.168.42.4 ansible_user=root ansible_password=
+
+[other_master]
+# 3281801204
+master ansible_host=192.168.42.28 ansible_user=root ansible_password=
+# 3281801205
+master ansible_host=192.168.42.29 ansible_user=root ansible_password=
+
+[worker]
+# 3281801200
+worker1 ansible_host=192.168.42.26 ansible_user=root ansible_password=
+
