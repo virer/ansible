@@ -4,7 +4,7 @@ TODO:
 >Add dnsmasq, haproxy and keepalived
 
 PROXY fix:
-> cat <<EOF>>/etc/sysconfig/crio
+<pre> cat <<EOF>>/etc/sysconfig/crio
   HTTPS_PROXY=http://webproxy.example.be:8080
   HTTP_PROXY=http://webproxy.example.be:8080
   http_proxy=http://webproxy.example.be:8080
@@ -14,3 +14,4 @@ PROXY fix:
   EOF
 
   # systemctl restart crio
+</pre>
