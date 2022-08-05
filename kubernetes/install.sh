@@ -9,6 +9,8 @@ cp -r ~/.ansible/collections/ansible_collections/gaurav_gupta_gtm/ansible_kubead
 # Patch
 sed -i 's#--pod-network-cidr#--service-cidr#g' ~/.ansible/roles/master/tasks/main.yml
 sed -i 's/slave/worker/g' ~/.ansible/roles/node/README.md
+sed -i 's/scommunity.general.modprobe/modprobe/g' ~/.ansible/collections/ansible_collections/gaurav_gupta_gtm/ansible_kubeadm/roles/runtime/crio_setup/tasks/main.yml
+
 
 mkdir -m 750 ~/.ssh ~/group_vars
 cat <<EOF> group_vars/all.yml
