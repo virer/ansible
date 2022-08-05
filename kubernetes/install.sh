@@ -3,13 +3,14 @@
 
 ansible-galaxy collection install  gaurav_gupta_gtm.ansible_kubeadm
 
-cp -r .ansible/collections/ansible_collections/gaurav_gupta_gtm/ansible_kubeadm/roles .ansible/
+cd ~
+cp -r ~/.ansible/collections/ansible_collections/gaurav_gupta_gtm/ansible_kubeadm/roles ~/.ansible/
 
 # Patch
-sed -i 's#--pod-network-cidr#--service-cidr#g' .ansible/roles/master/tasks/main.yml
-sed -i 's/slave/worker/g' node/README.md
+sed -i 's#--pod-network-cidr#--service-cidr#g' ~/.ansible/roles/master/tasks/main.yml
+sed -i 's/slave/worker/g' ~/.ansible/roles/node/README.md
 
-mkdir -m 750 .ssh group_vars
+mkdir -m 750 ~/.ssh ~/group_vars
 cat <<EOF> group_vars/all.yml
 ---
 pod_network_cidr: "100.64.0.0/16"
