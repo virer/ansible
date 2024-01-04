@@ -1,0 +1,85 @@
+{% for item in dns_servers %}
+server={{ item }}
+{% endfor %}
+
+## DHCP Configuration
+# Only recorded mac-address in dhcp-host  using this configuration
+dhcp-range={{ gateway_ip }},static
+
+# Default Gateway
+dhcp-option=3,{{ gateway_ip }}
+# DNS
+dhcp-option=6,{{ bastion_ip }}
+
+### LOG
+log-facility=/var/log/dnsmasq.log   # logfile path.
+log-async
+# log-queries
+log-dhcp
+
+local=/{{ cluster_name }}.{{ base_domain }}/
+domain={{ cluster_name }}.{{ base_domain }}
+
+### PXE
+enable-tftp
+tftp-root=/var/lib/tftpboot/
+dhcp-boot=pxelinux.0
+### 
+
+### START-DHCP-HOST
+dhcp-host={{ bootstrapnodes['bootstrapnodes']['bootstrap0']['macAddress'] }},{{ bootstrapnodes['bootstrapnodes']['bootstrap0']['ip'] }},infinite
+{% for item in masternodes['masternodes'] %}
+dhcp-host={{ masternodes['masternodes'][item]['macAddress'] }},{{ masternodes['masternodes'][item]['ip'] }},infinite
+{% endfor -%}
+{% for item in infranodes['infranodes'] %}
+dhcp-host={{ infranodes['infranodes'][item]['macAddress'] }},{{ infranodes['infranodes'][item]['ip'] }},infinite
+{% endfor -%}
+{% for item in workernodes['workernodes'] %}
+dhcp-host={{ workernodes['workernodes'][item]['macAddress'] }},{{ workernodes['workernodes'][item]['ip'] }},infinite
+{% endfor -%}
+### END-DHCP-HOST
+
+## DNS Configuration
+
+### START-ADDRESS
+address=/apps.{{ cluster_name }}.{{ base_domain }}/{{ bastion_ip }}
+### END-ADDRESS
+
+### START-PTR-RECORD
+ptr-record={{ (bootstrap_ip.split('.'))[::-1]|join('.') }}.in-addr.arpa,bootstrap0.{{ cluster_name }}.{{ base_domain }}
+ptr-record={{ (bastion_ip.split('.'))[::-1]|join('.') }}.in-addr.arpa,api.{{ cluster_name }}.{{ base_domain }}
+ptr-record={{ (bastion_ip.split('.'))[::-1]|join('.') }}.in-addr.arpa,api-int.{{ cluster_name }}.{{ base_domain }}
+{% for item in masternodes['masternodes'] %}
+ptr-record={{ (masternodes['masternodes'][item]['ip'].split('.'))[::-1]|join('.') }}.in-addr.arpa,{{ masternodes['masternodes'][item]['name'] }}
+ptr-record={{ (masternodes['masternodes'][item]['ip'].split('.'))[::-1]|join('.') }}.in-addr.arpa,{{ masternodes['masternodes'][item]['name'] | replace("master", "etcd-") }}
+{% endfor -%}
+{% for item in infranodes['infranodes'] %}
+ptr-record={{ (infranodes['infranodes'][item]['ip'].split('.'))[::-1]|join('.') }}.in-addr.arpa,{{ infranodes['infranodes'][item]['name'] }}
+{% endfor -%}
+{% for item in workernodes['workernodes'] %}
+ptr-record={{ (workernodes['workernodes'][item]['ip'].split('.'))[::-1]|join('.') }}.in-addr.arpa,{{ workernodes['workernodes'][item]['name'] }}
+{% endfor -%}
+### END-PTR-RECORD
+
+### START-HOST-RECORD
+host-record=haproxy.{{ cluster_name }}.{{ base_domain }},{{ bastion_ip }}
+host-record=api-int.{{ cluster_name }}.{{ base_domain }},{{ bastion_ip }}
+host-record=api.{{ cluster_name }}.{{ base_domain }},{{ bastion_ip }}
+host-record=bootstrap0.{{ cluster_name }}.{{ base_domain }},{{ bootstrap_ip }}
+{% for item in masternodes['masternodes'] %}
+host-record={{ masternodes['masternodes'][item]['name'] }},{{ masternodes['masternodes'][item]['ip'] }}
+host-record={{ masternodes['masternodes'][item]['name'] | replace("master", "etcd-") }},{{ masternodes['masternodes'][item]['ip'] }}
+{% endfor -%}
+{% for item in infranodes['infranodes'] %}
+host-record={{ infranodes['infranodes'][item]['name'] }},{{ infranodes['infranodes'][item]['ip']  }}
+{% endfor -%}
+{% for item in workernodes['workernodes'] %}
+host-record={{ workernodes['workernodes'][item]['name'] }},{{ workernodes['workernodes'][item]['ip'] }}
+{% endfor -%}
+### END-HOST-RECORD
+
+### START-SRV-HOST-RECORD
+{% for item in masternodes['masternodes'] %}
+srv-host=_etcd-server-ssl._tcp.{{ cluster_name }}.{{ base_domain }},{{ masternodes['masternodes'][item]['name'] | replace("master", "etcd-") }},2380,0,10
+{% endfor %}
+### END-SRV-HOST-RECORD
